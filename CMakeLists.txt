@@ -10,6 +10,7 @@ set(API_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 set(BUILD_VERSION "${PROJECT_VERSION}")
 
 option(WANT_ZLIB "use zlib (ability to decompress layers data) ?" On)
+option(WANT_ZSTD "use zstd (ability to decompress layers data) ?" Off)
 option(BUILD_SHARED_LIBS "Build shared libraries (dll / so)" Off)
 
 set(EMSCRIPTEN False)
@@ -47,6 +48,14 @@ elseif(WANT_ZLIB)
 else()
     message("Zlib not wanted")
 endif()
+
+if(WANT_ZSTD)
+    target_compile_definitions(tmx PRIVATE WANT_ZSTD)
+    find_package(ZSTD REQUIRED)
+    target_link_libraries(tmx ZSTD::ZSTD)
+else()
+    message("zstd not wanted")
+ endif()
 
 include(FindLibXml2)
 find_package(LibXml2 REQUIRED)
