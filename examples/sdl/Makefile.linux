@@ -1,0 +1,124 @@
+#!/usr/bin/make -f
+
+NUMCPUS:=$(shell grep -c '^processor' /proc/cpuinfo)
+ARCH_NAME:=$(shell '$(TRGT)gcc' -dumpmachine)
+
+CURDIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+OBJ_DIR:=$(CURDIR)/$(ARCH_NAME)/obj
+
+TRGT=
+
+CC   = $(TRGT)gcc
+CXX  = $(TRGT)g++
+AS   = $(TRGT)gcc -x assembler-with-cpp
+
+LD   = $(TRGT)g++
+AR   = $(TRGT)ar rvc
+
+RM= rm --force --verbose
+
+PKGCONFIG= pkg-config
+
+PACKAGES= zlib libxml-2.0 sdl2 SDL2_image
+
+ifndef PACKAGES
+PKG_CONFIG_CFLAGS=
+PKG_CONFIG_LDFLAGS=
+PKG_CONFIG_LIBS=
+else
+PKG_CONFIG_CFLAGS=`$(PKGCONFIG) --cflags $(PACKAGES)`
+PKG_CONFIG_LDFLAGS=`$(PKGCONFIG) --libs-only-L $(PACKAGES)`
+PKG_CONFIG_LIBS=`$(PKGCONFIG) --libs-only-l $(PACKAGES)`
+endif
+
+CFLAGS= \
+	-Wall \
+	-fwrapv \
+	-fstack-protector-strong \
+	-Wall \
+	-Wformat \
+	-Werror=format-security \
+	-Wdate-time \
+	-D_FORTIFY_SOURCE=2 \
+	-fPIC
+
+LDFLAGS= \
+	-Wl,-O1 \
+	-Wl,-Bsymbolic-functions \
+	-Wl,-z,relro \
+	-Wl,--as-needed \
+	-Wl,--no-undefined \
+	-Wl,--no-allow-shlib-undefined \
+	-Wl,-Bsymbolic-functions \
+	-Wl,--dynamic-list-cpp-new \
+	-Wl,--dynamic-list-cpp-typeinfo
+
+CSTD=-std=gnu17
+CPPSTD=-std=gnu++17
+
+OPTS= -O2 -g
+
+DEFS= \
+	-DNDEBUG \
+	-D_LARGEFILE64_SOURCE \
+	-D_FILE_OFFSET_BITS=64 \
+	-DWANT_ZLIB\
+	-DWANT_ZSTD
+
+INCS= \
+	-I../../src/
+
+LIBS= \
+	-lzstd
+
+OBJS= \
+	$(OBJ_DIR)/sdl.o \
+	$(OBJ_DIR)/tmx.o \
+	$(OBJ_DIR)/tmx_err.o \
+	$(OBJ_DIR)/tmx_hash.o \
+	$(OBJ_DIR)/tmx_mem.o \
+	$(OBJ_DIR)/tmx_utils.o \
+	$(OBJ_DIR)/tmx_xml.o
+
+all: sdl.bin
+
+sdl.bin: $(OBJS)
+
+%.bin:
+	$(LD) $(CPPSTD) $(CSTD) $(LDFLAGS) $(PKG_CONFIG_LDFLAGS) -o $@ $+ $(LIBS) $(PKG_CONFIG_LIBS)
+
+%.so:
+	$(LD) -shared $(CPPSTD) $(CSTD) $(LDFLAGS) $(PKG_CONFIG_LDFLAGS) -o $@ $+ $(LIBS) $(PKG_CONFIG_LIBS)
+
+%.a:
+	$(AR) $@ $+
+
+$(OBJ_DIR)/%.o: ./%.cpp
+	@mkdir -p "$$(dirname '$@')"
+	$(CXX) $(CPPSTD) $(OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+$(OBJ_DIR)/%.o: ./%.c
+	@mkdir -p "$$(dirname '$@')"
+	$(CC) $(CSTD) $(OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+$(OBJ_DIR)/%.o: ../../src/%.cpp
+	@mkdir -p "$$(dirname '$@')"
+	$(CXX) $(CPPSTD) $(OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+$(OBJ_DIR)/%.o: ../../src/%.c
+	@mkdir -p "$$(dirname '$@')"
+	$(CC) $(CSTD) $(OPTS) -o $@ -c $< $(DEFS) $(INCS) $(CFLAGS) $(PKG_CONFIG_CFLAGS)
+
+clean:
+	$(RM) $(OBJS)
+	@find . -name '*.o' -exec $(RM) {} +
+	@find . -name '*.a' -exec $(RM) {} +
+	@find . -name '*.so' -exec $(RM) {} +
+	@find . -name '*.pyc' -exec $(RM) {} +
+	@find . -name '*.pyo' -exec $(RM) {} +
+	@find . -name '*.bak' -exec $(RM) {} +
+	@find . -name '*~' -exec $(RM) {} +
+	@$(RM) core
+	@rmdir '$(OBJ_DIR)' '$(CURDIR)/$(ARCH_NAME)/' --verbose 2>/dev/null || true
+
+.PHONY: all clean
