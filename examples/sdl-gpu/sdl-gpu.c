@@ -91,7 +91,16 @@ void draw_tile(GPU_Target *screen, void *image, unsigned int sx, unsigned int sy
 	src_rect.h = dest_rect.h = sh;
 	dest_rect.x = dx;
 	dest_rect.y = dy;
-	GPU_BlitRect((GPU_Image*)image, &src_rect, screen, &dest_rect);
+	switch (flags) {
+		case TMX_FLIPPED_HORIZONTALLY:
+			GPU_BlitRectX((GPU_Image*)image, &src_rect, screen, &dest_rect, 0., 0., 0., GPU_FLIP_HORIZONTAL);
+			break;
+		case TMX_FLIPPED_VERTICALLY:
+			GPU_BlitRectX((GPU_Image*)image, &src_rect, screen, &dest_rect, 0., 0., 0., GPU_FLIP_VERTICAL);
+			break;
+		default:
+			GPU_BlitRect((GPU_Image*)image, &src_rect, screen, &dest_rect);
+	}
 }
 
 void draw_layer(GPU_Target *screen, tmx_map *map, tmx_layer *layer) {
