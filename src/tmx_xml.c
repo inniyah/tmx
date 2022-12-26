@@ -1280,7 +1280,7 @@ tmx_map *parse_xml(tmx_resource_manager *rc_mgr, const char *filename) {
 }
 
 tmx_map* parse_xml_buffer(tmx_resource_manager *rc_mgr, const char *buffer, int len) {
-	parse_xml_buffer_path(rc_mgr, buffer, len, NULL);
+	return parse_xml_buffer_path(rc_mgr, buffer, len, NULL);
 }
 
 tmx_map* parse_xml_buffer_path(tmx_resource_manager *rc_mgr, const char *buffer, int len, const char *path) {

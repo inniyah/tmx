@@ -153,7 +153,7 @@ void draw_all_layers(GPU_Target *screen, tmx_map *map, tmx_layer *layers) {
 				draw_objects(screen, layers->content.objgr);
 			}
 			else if (layers->type == L_IMAGE) {
-				draw_image_layer(screen, layers->content.image);
+				draw_image_layer(screen, layers->content.image_layer->image);
 			}
 			else if (layers->type == L_LAYER) {
 				draw_layer(screen, map, layers);

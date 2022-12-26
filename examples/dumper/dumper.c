@@ -323,7 +323,7 @@ void dump_layer(tmx_layer *l, unsigned int tc, int depth) {
 			dump_objects(l->content.objgr->head, depth+1);
 		} else if (l->type == L_IMAGE) {
 			printf("\n%s\t" "type=ImageLayer", padding);
-			dump_image(l->content.image, depth+1);
+			dump_image(l->content.image_layer->image, depth+1);
 		} else if (l->type == L_GROUP) {
 			printf("\n%s\t" "type=Group", padding);
 			dump_layer(l->content.group_head, tc, depth+1);

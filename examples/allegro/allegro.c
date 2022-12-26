@@ -117,7 +117,7 @@ void draw_all_layers(tmx_map *map, tmx_layer *layers) {
 				draw_objects(layers->content.objgr);
 			}
 			else if (layers->type == L_IMAGE) {
-				draw_image_layer(layers->content.image);
+				draw_image_layer(layers->content.image_layer->image);
 			}
 			else if (layers->type == L_LAYER) {
 				draw_layer(map, layers);
