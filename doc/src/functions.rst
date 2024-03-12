@@ -114,6 +114,24 @@ Maps
    Load a TMX map using a callback function as defined above. `userdata` is passed as-is.
    See :c:type:`tmx_read_functor`.
 
+Variants with virtual paths
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In case you're working with a virtual file system, you may use these variants accepting a virtual path:
+
+.. c:function:: tmx_map* tmx_rcmgr_load_buffer_vpath(tmx_resource_manager *rc_mgr, const char *buffer, int len, const char *vpath)
+
+   Load a TMX map from the given buffer whose length is len, with a given virtual path.
+
+.. c:function:: tmx_map* tmx_rcmgr_load_fd_vpath(tmx_resource_manager *rc_mgr, int fd, const char *vpath)
+
+   Load a TMX map from a C file descriptor, with a given virtual path.
+
+.. c:function:: tmx_map* tmx_rcmgr_load_callback_vpath(tmx_resource_manager *rc_mgr, tmx_read_functor callback, const char *vpath, void *userdata)
+
+   Load a TMX map using a callback function as defined above. `userdata` is passed as-is, with a given virtual path.
+   See :c:type:`tmx_read_functor`.
+
 Utilities
 ---------
 
